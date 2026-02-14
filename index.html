@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aura — Noir D'Or Edition</title>
+    
+    <!-- FONTS: Luxury Serif + Lab Mono + Human Script -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Reenie+Beanie&display=swap" rel="stylesheet">
+
+    <style>
+        /* PROTOCOL 0: VARIABLES & "ANTI-RGB" PALETTE */
+        :root {
+            --c-bg: #050505; /* Deepest Void */
+            --c-surface: #0F0F0F; /* Off-Black */
+            --c-gold: #C6A868; /* Muted, Realistic Gold */
+            --c-gold-dim: #5C4D2E;
+            --c-text: #E0E0E0; /* Soft White */
+            --c-accent: #CC4444; /* Alchemist Red for Notes */
+            
+            /* Typography */
+            --font-display: 'Cormorant Garamond', serif;
+            --font-tech: 'Space Mono', monospace;
+            --font-human: 'Reenie Beanie', cursive;
+            
+            /* Physics & Geometry */
+            --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            --radius-organic: 255px 15px 225px 15px / 15px 225px 15px 255px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-tech); /* Default to "Lab Report" style */
+            background: var(--c-bg);
+            color: var(--c-text);
+            overflow-x: hidden;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* PROTOCOL 1: TEXTURE & ATMOSPHERE (The "Film Grain") */
+        .noise-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9000;
+            opacity: 0.04;
+            background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E");
+            mix-blend-mode: overlay;
+        }
+
+        /* NAVIGATION: Glass & Monospace */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 1.5rem 4rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            background: rgba(5, 5, 5, 0.6);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+            transition: all 0.5s var(--ease-spring);
+        }
+
+        .logo {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            letter-spacing: 0.1rem;
+            color: var(--c-gold);
+            font-style: italic;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 3rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--c-text);
+            text-decoration: none;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15rem;
+            position: relative;
+            opacity: 0.7;
+            transition: opacity 0.3s;
+        }
+
+        .nav-links a:hover {
+            opacity: 1;
+            color: var(--c-gold);
+        }
+
+        /* HERO SECTION: Protocol 3 - Asymmetric Overlap */
+        .hero {
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            align-items: center;
+            padding: 0 4rem;
+            position: relative;
+            max-width: 1800px;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+
+        .hero-content {
+            grid-column: 1 / 8;
+            grid-row: 1;
+            z-index: 10;
+            position: relative;
+            mix-blend-mode: exclusion; /* Blends text with bottle */
+        }
+
+        .hero-bottle-container {
+            grid-column: 5 / 13; /* Overlaps text */
+            grid-row: 1;
+            z-index: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .hero-bottle {
+            max-height: 85vh;
+            width: auto;
+            filter: drop-shadow(0 20px 80px rgba(198, 168, 104, 0.15));
+            /* Initial state for JS rotation */
+            transform: perspective(1000px) rotateY(0deg);
+            will-change: transform;
+        }
+
+        .hero-label {
+            font-family: var(--font-tech);
+            color: var(--c-gold);
+            font-size: 0.7rem;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .hero-title {
+            font-family: var(--font-display);
+            font-size: clamp(4rem, 8vw, 9rem);
+            font-weight: 300;
+            line-height: 0.85;
+            letter-spacing: -0.02em;
+            margin-bottom: 2rem;
+            color: #fff;
+        }
+
+        .hero-title em {
+            font-family: var(--font-display);
+            font-style: italic;
+            color: var(--c-gold);
+        }
+
+        /* Protocol 4: Human Scribble */
+        .scribble {
+            font-family: var(--font-human);
+            color: var(--c-accent);
+            font-size: 1.5rem;
+            position: absolute;
+            transform: rotate(-10deg);
+            white-space: nowrap;
+        }
+
+        /* SECTION STYLING */
+        section {
+            padding: 8rem 4rem;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            margin-bottom: 5rem;
+            border-left: 2px solid var(--c-gold);
+            padding-left: 2rem;
+        }
+
+        .section-title {
+            font-family: var(--font-display);
+            font-size: 4rem;
+            font-weight: 300;
+            line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+
+        .section-subtitle {
+            font-family: var(--font-tech);
+            font-size: 0.8rem;
+            color: var(--c-gold);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        /* PROCESS SLIDER: Customized Handle */
+        .process-section {
+            background: radial-gradient(circle at center, #1a1a1a 0%, #050505 100%);
+            border-radius: 4px; /* Brutalist edge */
+            position: relative;
+        }
+
+        .slider-container {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16/9;
+            overflow: hidden;
+            /* Protocol 2: Organic shape for container */
+            border-radius: 200px 15px 200px 15px / 15px 200px 15px 200px; 
+            border: 1px solid rgba(255,255,255,0.05);
+            background: #000;
+        }
+
+        .slider-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .slider-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        
+        .slider-image.before {
+             /* Wireframe styling if needed */
+        }
+
+        .slider-image.after {
+            clip-path: polygon(0 0, 50% 0, 50% 100%, 0 100%);
+        }
+
+        .slider-handle {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 1px;
+            height: 100%;
+            background: var(--c-gold);
+            cursor: ew-resize;
+            z-index: 10;
+        }
+
+        .slider-knob {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px;
+            height: 60px;
+            background: rgba(10,10,10,0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--c-gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--c-gold);
+            font-family: var(--font-tech);
+            font-size: 1.2rem;
+            transition: transform 0.2s var(--ease-spring);
+        }
+
+        .slider-handle:hover .slider-knob {
+            transform: translate(-50%, -50%) scale(1.2);
+        }
+
+        /* SPECS GRID: Masonry / Card Style */
+        .specs-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 2rem;
+        }
+
+        .spec-card {
+            background: var(--c-surface);
+            padding: 3rem;
+            position: relative;
+            /* Protocol 2: Organic Geometry */
+            border-radius: 40px 10px 60px 20px / 30px 50px 10px 40px;
+            border: 1px solid rgba(255,255,255,0.03);
+            transition: all 0.4s var(--ease-spring);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* Asymmetric Layout */
+        .spec-card:nth-child(1) { grid-column: 1 / 7; }
+        .spec-card:nth-child(2) { grid-column: 7 / 13; margin-top: 4rem; } /* Offset */
+        .spec-card:nth-child(3) { grid-column: 3 / 11; }
+
+        .spec-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            background: #151515;
+            border-color: var(--c-gold-dim);
+        }
+
+        .spec-meta {
+            font-family: var(--font-tech);
+            color: var(--c-gold);
+            font-size: 0.65rem;
+            margin-bottom: 2rem;
+            opacity: 0.7;
+            border-bottom: 1px dashed rgba(255,255,255,0.1);
+            padding-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .spec-title {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            font-weight: 400;
+        }
+
+        .spec-description {
+            font-family: var(--font-tech);
+            font-size: 0.85rem;
+            color: #888;
+            line-height: 1.8;
+        }
+
+        /* ABOUT SECTION */
+        .about-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6rem;
+            align-items: center;
+        }
+
+        .about-image-wrapper {
+            position: relative;
+            /* Protocol 2 */
+            border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+            overflow: hidden;
+            aspect-ratio: 4/5;
+        }
+
+        .about-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            filter: grayscale(100%) sepia(10%) contrast(110%);
+            transition: filter 0.5s ease;
+        }
+        
+        .about-image:hover {
+            filter: grayscale(0%);
+        }
+
+        .cta-button {
+            display: inline-block;
+            margin-top: 2rem;
+            padding: 1.2rem 3rem;
+            background: transparent;
+            border: 1px solid var(--c-gold);
+            color: var(--c-gold);
+            font-family: var(--font-tech);
+            font-size: 0.8rem;
+            text-decoration: none;
+            /* Protocol 2 */
+            border-radius: 30px 60px 60px 30px / 50px 30px 60px 40px;
+            transition: all 0.3s var(--ease-spring);
+        }
+
+        .cta-button:hover {
+            background: var(--c-gold);
+            color: #000;
+            border-radius: 60px 30px 30px 60px / 30px 50px 40px 60px;
+        }
+
+        /* FOOTER */
+        footer {
+            border-top: 1px solid rgba(255,255,255,0.05);
+            padding: 6rem 4rem;
+            text-align: center;
+        }
+
+        .footer-logo {
+            font-family: var(--font-display);
+            font-size: 5rem;
+            color: #1a1a1a; /* Subtle watermark look */
+            margin-bottom: 2rem;
+        }
+
+        .copyright {
+            font-family: var(--font-tech);
+            font-size: 0.7rem;
+            opacity: 0.4;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 1024px) {
+            .hero, .specs-grid, .about-section {
+                grid-template-columns: 1fr;
+            }
+            .hero-content {
+                grid-column: 1 / -1;
+                margin-top: 10vh;
+            }
+            .hero-bottle-container {
+                grid-column: 1 / -1;
+                height: 60vh;
+                order: -1;
+            }
+            .spec-card:nth-child(n) {
+                grid-column: 1 / -1;
+                margin-top: 2rem;
+            }
+        }
+        
+        /* LOADING */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--c-bg);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-tech);
+            font-size: 0.8rem;
+            color: var(--c-gold);
+            transition: opacity 0.5s ease;
+        }
+        
+        .loading-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+    </style>
+</head>
+<body>
+    
+    <!-- Protocol 1: The Noise Overlay -->
+    <div class="noise-overlay"></div>
+
+    <div class="loading-overlay" id="loadingOverlay">
+        [INITIALIZING SYSTEM...]
+    </div>
+
+    <nav id="nav">
+        <div class="logo">AURA.</div>
+        <ul class="nav-links">
+            <li><a href="#process">The Process</a></li>
+            <li><a href="#details">Chemistry</a></li>
+            <li><a href="#about">Philosophy</a></li>
+        </ul>
+    </nav>
+
+    <section class="hero" id="home">
+        <div class="hero-content">
+            <span class="hero-label">Collection 2026 // Noir D'Or</span>
+            <h1 class="hero-title">
+                Midnight<br>
+                <em>Rose</em>
+                <!-- Protocol 4: Human Scribble -->
+                <span class="scribble" style="top: 20%; right: 10%;">Extract No. 5</span>
+            </h1>
+            <p style="font-family: var(--font-tech); max-width: 400px; color: #888;">
+                [REF: SCENT_01] <br>
+                A study in olfactory darkness. Heavy amber notes suspended in a matrix of synthetic oud and digital gold.
+            </p>
+        </div>
+        
+        <div class="hero-bottle-container">
+            <!-- Asset 1: Transparent Bottle -->
+            <img src="assets/images/aura-bottle-hero.png" 
+                 alt="Aura Perfume" 
+                 class="hero-bottle" 
+                 id="heroBottle"
+                 onerror="this.style.display='none'; this.parentElement.innerHTML='<div style=\'border:1px dashed #333; padding:2rem; color:#444; font-family:monospace;\'>[MISSING: assets/images/aura-bottle-hero.png]</div>'">
+        </div>
+    </section>
+
+    <section class="process-section" id="process">
+        <div class="section-header">
+            <span class="section-subtitle">Fig. 01 — Evolution</span>
+            <h2 class="section-title">The Process</h2>
+        </div>
+        
+        <div class="slider-container" id="sliderContainer">
+            <!-- Asset 2: Wireframe -->
+            <div class="slider-image before">
+                <img src="assets/images/process-wireframe.jpg" 
+                     alt="Wireframe Mesh"
+                     onerror="this.parentElement.style.background='#111'; this.parentElement.innerHTML='<div style=\'width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#666;font-family:monospace\'>[MISSING: process-wireframe.jpg]</div>'">
+            </div>
+            
+            <!-- Asset 3: Final Render -->
+            <div class="slider-image after" id="afterImage">
+                <img src="assets/images/process-render-final.jpg" 
+                     alt="Final Render"
+                     onerror="this.style.display='none'">
+            </div>
+            
+            <div class="slider-handle" id="sliderHandle">
+                <div class="slider-knob">⇄</div>
+            </div>
+        </div>
+    </section>
+
+    <section id="details">
+        <div class="section-header">
+            <span class="section-subtitle">Fig. 02 — Specifications</span>
+            <h2 class="section-title">Component Analysis</h2>
+        </div>
+        
+        <div class="specs-grid">
+            <div class="spec-card">
+                <div class="spec-meta">
+                    <span>PART: CAP_01</span>
+                    <span>MAT: AU_750</span>
+                </div>
+                <h3 class="spec-title">Brushed Alloy</h3>
+                <p class="spec-description">
+                    Hand-polished brushed gold cap with micro-texture detail. 
+                    Each reflection carefully mapped to capture the weight and luxury of precious metal.
+                </p>
+                <span class="scribble" style="bottom: 2rem; right: 2rem; font-size: 1rem; transform: rotate(-5deg);">Roughness: 0.35</span>
+            </div>
+            
+            <div class="spec-card">
+                <div class="spec-meta">
+                    <span>PART: BODY_02</span>
+                    <span>MAT: GLASS_BLK</span>
+                </div>
+                <h3 class="spec-title">Obsidian Glass</h3>
+                <p class="spec-description">
+                    UV-mapped embossed lettering with subsurface scattering. 
+                    The depth and shadow create a tactile quality that feels touchable through the screen.
+                </p>
+            </div>
+            
+            <div class="spec-card">
+                <div class="spec-meta">
+                    <span>PART: FLUID_03</span>
+                    <span>MAT: LIQUID_AMBER</span>
+                </div>
+                <h3 class="spec-title">Fluid Physics</h3>
+                <p class="spec-description">
+                    Advanced liquid simulation with accurate refraction index (1.45). 
+                    The amber fluid catches light like real perfume oil, creating depth and warmth.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section class="about-section" id="about">
+        <div class="about-image-wrapper">
+             <!-- Asset 4: Philosophy Mood -->
+             <img src="assets/images/philosophy-mood.jpg" 
+             alt="Philosophy" 
+             class="about-image"
+             onerror="this.style.display='none'; this.parentElement.style.background='#111';">
+        </div>
+        <div class="about-content">
+            <span class="section-subtitle">Fig. 03 — Manifesto</span>
+            <h2 class="section-title" style="font-size: 3rem;">Digital<br>Artifacts</h2>
+            <p style="font-family: var(--font-tech); color: #999; margin-bottom: 2rem;">
+                Aura is more than fragrance—it's an experience translated into light, texture, and form. 
+                We reject the perfect render. We embrace the grain, the shadow, and the weight.
+            </p>
+            <a href="#contact" class="cta-button">INITIATE ORDER SEQUENCE</a>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-logo">AURA.</div>
+        <p class="copyright">
+            SYSTEM STATUS: ONLINE <br>
+            © 2026 AURA SCENT LABS. ALL RIGHTS RESERVED.
+        </p>
+    </footer>
+
+    <script>
+        // LOADING
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('loadingOverlay').classList.add('hidden');
+            }, 800);
+        });
+
+        // PROTOCOL 5: PHYSICS BOTTLE ROTATION
+        const heroBottle = document.getElementById('heroBottle');
+        
+        window.addEventListener('scroll', () => {
+            const scrollY = window.scrollY;
+            if (!heroBottle) return;
+            
+            // Limit rotation to hero section height
+            if (scrollY < window.innerHeight) {
+                const rotation = scrollY * 0.05;
+                // Add slight tilt on Z axis for organic feel
+                const tilt = scrollY * 0.01;
+                heroBottle.style.transform = `perspective(1000px) rotateY(${rotation}deg) rotateZ(${tilt}deg)`;
+            }
+        });
+
+        // SLIDER LOGIC
+        const sliderContainer = document.getElementById('sliderContainer');
+        const sliderHandle = document.getElementById('sliderHandle');
+        const afterImage = document.getElementById('afterImage');
+        let isDragging = false;
+
+        function updateSlider(x) {
+            const rect = sliderContainer.getBoundingClientRect();
+            // Clamp x within container
+            let posX = Math.max(0, Math.min(x - rect.left, rect.width));
+            let percentage = (posX / rect.width) * 100;
+
+            sliderHandle.style.left = `${percentage}%`;
+            afterImage.style.clipPath = `polygon(0 0, ${percentage}% 0, ${percentage}% 100%, 0 100%)`;
+        }
+
+        sliderHandle.addEventListener('mousedown', () => isDragging = true);
+        window.addEventListener('mouseup', () => isDragging = false);
+        window.addEventListener('mousemove', (e) => {
+            if (isDragging) updateSlider(e.clientX);
+        });
+
+        // Touch support
+        sliderHandle.addEventListener('touchstart', () => isDragging = true);
+        window.addEventListener('touchend', () => isDragging = false);
+        window.addEventListener('touchmove', (e) => {
+            if (isDragging) updateSlider(e.touches[0].clientX);
+        });
+
+        // INTERSECTION OBSERVER FOR FADE IN
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.spec-card, .about-content, .hero-content').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(40px)';
+            el.style.transition = 'all 0.8s var(--ease-spring)';
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>
